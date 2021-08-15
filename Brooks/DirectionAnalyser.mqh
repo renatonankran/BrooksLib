@@ -8,6 +8,8 @@
 #include <Controls\RadioGroup.mqh>
 #include <Dev\Brooks\Backtest.mqh>
 #include <Dev\Brooks\AlwaysInEnum.mqh>
+#include <Dev\Brooks\Directions.mqh>
+#include <Dev\Brooks\DirectionStruct.mqh>
 //+------------------------------------------------------------------+
 //| defines                                                          |
 //+------------------------------------------------------------------+
@@ -35,42 +37,48 @@
 class CControlsDialog : public CAppDialog
   {
 private:
-   CButton           m_button1;
+   CButton           m_button1,m_button2;
    CRadioGroup       m_radio_group;
-   CBacktest         m_Backtest;
-   ALWAYS_IN         m_always_direction;
+   CDirections       m_directions;
+   string            m_line_name;
+   datetime          m_start_time, m_end_time;
 public:
-                     CControlsDialog(CBacktest &Backtest);
+                     CControlsDialog(datetime start_time, datetime end_time);
                     ~CControlsDialog(void);
    //--- create
    virtual bool      Create(const long chart,const string name,const int subwin,const int x1,const int y1,const int x2,const int y2);
    //--- chart event handler
    virtual bool      OnEvent(const int id,const long &lparam,const double &dparam,const string &sparam);
-   int               GetAlwaysDirection(void);
 
 protected:
-   //--- create dependent controls
-   bool              CreateButton1(void);
+   bool              CreateButtons(void);
    bool              CreateAlwaysInRadios(void);
-   //--- handlers of the dependent controls events
-   void              OnClickNextCandle(void);
-   void              OnChangeRadioGroup();
+   void              OnClickSaveDirection(void);
+   void              OnClickWriteFile(void);
+   void              OnChangeRadioGroup(void);
+   void              WriteDirectionToFile(void);
+   string            CreateVLine(datetime time);
+   datetime          GetCurrentCandleTime(void);
   };
 
 //+------------------------------------------------------------------+
 //| Event Handling                                                   |
 //+------------------------------------------------------------------+
 EVENT_MAP_BEGIN(CControlsDialog)
-ON_EVENT(ON_CLICK,m_button1,OnClickNextCandle)
+ON_EVENT(ON_CLICK,m_button1,OnClickSaveDirection)
+ON_EVENT(ON_CLICK,m_button2,OnClickWriteFile)
 ON_EVENT(ON_CHANGE,m_radio_group,OnChangeRadioGroup)
 EVENT_MAP_END(CAppDialog)
 
 //+------------------------------------------------------------------+
 //| Constructor                                                      |
 //+------------------------------------------------------------------+
-CControlsDialog::CControlsDialog(CBacktest &Backtest)
+CControlsDialog::CControlsDialog(datetime start_time, datetime end_time)
   {
-   m_Backtest = Backtest;
+   m_start_time = start_time;
+   m_end_time = end_time;
+   m_line_name = CreateVLine(start_time);
+   m_directions = CDirections();
   }
 //+------------------------------------------------------------------+
 //| Destructor                                                       |
@@ -86,7 +94,7 @@ bool CControlsDialog::Create(const long chart,const string name,const int subwin
    if(!CAppDialog::Create(chart,name,subwin,x1,y1,x2,y2))
       return(false);
 //--- create dependent controls
-   if(!CreateButton1())
+   if(!CreateButtons())
       return(false);
    if(!CreateAlwaysInRadios())
       return(false);
@@ -97,19 +105,29 @@ bool CControlsDialog::Create(const long chart,const string name,const int subwin
 //+------------------------------------------------------------------+
 //| Create the "Button1" button                                      |
 //+------------------------------------------------------------------+
-bool CControlsDialog::CreateButton1(void)
+bool CControlsDialog::CreateButtons(void)
   {
 //--- coordinates
-   int x1=INDENT_LEFT;
-   int y1=INDENT_TOP+(CONTROLS_GAP_Y);
-   int x2=x1+BUTTON_WIDTH;
-   int y2=y1+BUTTON_HEIGHT;
+   int b1x1=INDENT_LEFT;
+   int b1y1=INDENT_TOP+(CONTROLS_GAP_Y);
+   int b1x2=b1x1+BUTTON_WIDTH;
+   int b1y2=b1y1+BUTTON_HEIGHT;
+   int b2x1=b1x1+BUTTON_WIDTH+CONTROLS_GAP_X;
+   int b2y1=INDENT_TOP+(CONTROLS_GAP_Y);
+   int b2x2=b1x2+BUTTON_WIDTH;
+   int b2y2=b2y1+BUTTON_HEIGHT;
 //--- create
-   if(!m_button1.Create(m_chart_id,m_name+"NextCandle",m_subwin,x1,y1,x2,y2))
+   if(!m_button1.Create(m_chart_id,m_name+"Save Direction",m_subwin,b1x1,b1y1,b1x2,b1y2))
       return(false);
-   if(!m_button1.Text("Next candle"))
+   if(!m_button1.Text("Save Direction"))
       return(false);
    if(!Add(m_button1))
+      return(false);
+   if(!m_button2.Create(m_chart_id,m_name+"Write File",m_subwin,b2x1,b2y1,b2x2,b2y2))
+      return(false);
+   if(!m_button2.Text("Write File"))
+      return(false);
+   if(!Add(m_button2))
       return(false);
 //--- succeed
    return(true);
@@ -137,18 +155,8 @@ bool CControlsDialog::CreateAlwaysInRadios(void)
       if(!m_radio_group.AddItem(names[i],i))
          return(false);
    m_radio_group.Value(0);
-   Print(m_radio_group.Value());
 //--- succeed
    return(true);
-  }
-//+------------------------------------------------------------------+
-//| Event handler                                                    |
-//+------------------------------------------------------------------+
-void CControlsDialog::OnClickNextCandle(void)
-  {
-   m_Backtest.NextCandle();
-   Print(GetAlwaysDirection());
-   m_Backtest.PrintTimestamp();
   }
 
 //+------------------------------------------------------------------+
@@ -156,9 +164,50 @@ void CControlsDialog::OnClickNextCandle(void)
 //+------------------------------------------------------------------+
 void CControlsDialog::OnChangeRadioGroup(void)
   {
-   m_always_direction=m_radio_group.Value();
   }
 //+------------------------------------------------------------------+
-int CControlsDialog::GetAlwaysDirection(){
-   return m_radio_group.Value();
-}
+void CControlsDialog::OnClickSaveDirection(void)
+  {
+   datetime time = GetCurrentCandleTime();
+   int direction = m_radio_group.Value();
+   m_directions.Append(direction,time);
+   m_directions.PrintArray();
+  }
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+void CControlsDialog::OnClickWriteFile()
+  {
+   int h=FileOpen("win"+TimeToString(m_start_time,TIME_DATE)+"-"+TimeToString(m_end_time,TIME_DATE), FILE_WRITE|FILE_CSV|FILE_ANSI,",");
+   ResetLastError();
+   if(h==INVALID_HANDLE)
+     {
+      Alert("Error opening file");
+      return;
+     }
+   FileSeek(h,0,SEEK_END);
+   m_directions.Trim();
+   for(int i=0; i<m_directions.GetSize(); i++)
+     {
+      s_Directions tmp = m_directions.GetItem(i);
+      FileWrite(h,tmp.timestamp,tmp.direction);
+     }
+   FileClose(h);
+  }
+//+------------------------------------------------------------------+
+string CControlsDialog::CreateVLine(datetime time)
+  {
+   if(!ObjectCreate(0,"MarkerTimeLine",OBJ_VLINE,0,time,0))
+     {
+      Print(__FUNCTION__,
+            ": failed to create Vertical Line! Error code = ",GetLastError());
+     }
+   ObjectSetInteger(0,"MarkerTimeLine",OBJPROP_SELECTABLE,true);
+   return "MarkerTimeLine";
+  }
+//+------------------------------------------------------------------+
+datetime CControlsDialog::GetCurrentCandleTime(void)
+  {
+   return ObjectGetInteger(0,"MarkerTimeLine",OBJPROP_TIME,0);
+  }
+//+------------------------------------------------------------------+
