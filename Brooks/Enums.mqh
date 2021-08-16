@@ -31,3 +31,9 @@ enum ALWAYS_IN
    ALWAYS_IN_SHORT,
    ALWAYS_IN_RANGE
   };
+
+enum MICRO_CHANNEL {
+   BULL_MC=0,
+   BEAR_MC,
+   NO_CHANNEL
+};

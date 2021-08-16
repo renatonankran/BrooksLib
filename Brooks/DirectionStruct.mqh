@@ -1,4 +1,4 @@
-#include <Dev\Brooks\AlwaysInEnum.mqh>
+#include <Dev\Brooks\Enums.mqh>
 
 struct s_Directions
   {

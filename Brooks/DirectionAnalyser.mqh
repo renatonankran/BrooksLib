@@ -37,7 +37,7 @@
 class CControlsDialog : public CAppDialog
   {
 private:
-   CButton           m_button1,m_button2;
+   CButton           m_button1,m_button2,m_button3;
    CRadioGroup       m_radio_group;
    CDirections       m_directions;
    string            m_line_name;
@@ -55,6 +55,7 @@ protected:
    bool              CreateAlwaysInRadios(void);
    void              OnClickSaveDirection(void);
    void              OnClickWriteFile(void);
+   void              OnClickUndo(void);
    void              OnChangeRadioGroup(void);
    void              WriteDirectionToFile(void);
    string            CreateVLine(datetime time);
@@ -67,6 +68,7 @@ protected:
 EVENT_MAP_BEGIN(CControlsDialog)
 ON_EVENT(ON_CLICK,m_button1,OnClickSaveDirection)
 ON_EVENT(ON_CLICK,m_button2,OnClickWriteFile)
+ON_EVENT(ON_CLICK,m_button3,OnClickUndo)
 ON_EVENT(ON_CHANGE,m_radio_group,OnChangeRadioGroup)
 EVENT_MAP_END(CAppDialog)
 
@@ -116,6 +118,10 @@ bool CControlsDialog::CreateButtons(void)
    int b2y1=INDENT_TOP+(CONTROLS_GAP_Y);
    int b2x2=b1x2+BUTTON_WIDTH;
    int b2y2=b2y1+BUTTON_HEIGHT;
+   int b3x1=b2x1+BUTTON_WIDTH;
+   int b3y1=INDENT_TOP+(CONTROLS_GAP_Y);
+   int b3x2=b2x2+BUTTON_WIDTH;
+   int b3y2=b3y1+BUTTON_HEIGHT;
 //--- create
    if(!m_button1.Create(m_chart_id,m_name+"Save Direction",m_subwin,b1x1,b1y1,b1x2,b1y2))
       return(false);
@@ -128,6 +134,12 @@ bool CControlsDialog::CreateButtons(void)
    if(!m_button2.Text("Write File"))
       return(false);
    if(!Add(m_button2))
+      return(false);
+   if(!m_button3.Create(m_chart_id,m_name+"Undo",m_subwin,b3x1,b3y1,b3x2,b3y2))
+      return(false);
+   if(!m_button3.Text("Undo"))
+      return(false);
+   if(!Add(m_button3))
       return(false);
 //--- succeed
    return(true);
@@ -165,6 +177,9 @@ bool CControlsDialog::CreateAlwaysInRadios(void)
 void CControlsDialog::OnChangeRadioGroup(void)
   {
   }
+
+//+------------------------------------------------------------------+
+//|                                                                  |
 //+------------------------------------------------------------------+
 void CControlsDialog::OnClickSaveDirection(void)
   {
@@ -178,7 +193,7 @@ void CControlsDialog::OnClickSaveDirection(void)
 //+------------------------------------------------------------------+
 void CControlsDialog::OnClickWriteFile()
   {
-   int h=FileOpen("win"+TimeToString(m_start_time,TIME_DATE)+"-"+TimeToString(m_end_time,TIME_DATE), FILE_WRITE|FILE_CSV|FILE_ANSI,",");
+   int h=FileOpen("win"+TimeToString(m_start_time,TIME_DATE)+"-"+TimeToString(m_end_time,TIME_DATE)+".csv", FILE_WRITE|FILE_CSV|FILE_ANSI,",");
    ResetLastError();
    if(h==INVALID_HANDLE)
      {
@@ -194,6 +209,17 @@ void CControlsDialog::OnClickWriteFile()
      }
    FileClose(h);
   }
+
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+void CControlsDialog::OnClickUndo(void)
+  {
+   m_directions.Pop();
+  }
+
+//+------------------------------------------------------------------+
+//|                                                                  |
 //+------------------------------------------------------------------+
 string CControlsDialog::CreateVLine(datetime time)
   {
@@ -205,9 +231,13 @@ string CControlsDialog::CreateVLine(datetime time)
    ObjectSetInteger(0,"MarkerTimeLine",OBJPROP_SELECTABLE,true);
    return "MarkerTimeLine";
   }
+
+//+------------------------------------------------------------------+
+//|                                                                  |
 //+------------------------------------------------------------------+
 datetime CControlsDialog::GetCurrentCandleTime(void)
   {
    return ObjectGetInteger(0,"MarkerTimeLine",OBJPROP_TIME,0);
   }
+
 //+------------------------------------------------------------------+

@@ -47,7 +47,7 @@ void CDirections::Append(int direction,datetime time)
      {
       Extend();
      }
-   always_direction[lastPosition].direction=direction;
+   always_direction[lastPosition].direction=(ALWAYS_IN)direction;
    always_direction[lastPosition].timestamp=time;
    lastPosition++;
   }
@@ -64,6 +64,8 @@ void CDirections::Trim(void)
 //+------------------------------------------------------------------+
 s_Directions CDirections::Pop(void)
   {
+   s_Directions dir;
+   if(lastPosition==0) return dir;
    int last_tmp = lastPosition;
    lastPosition--;
    return always_direction[last_tmp];
@@ -71,7 +73,6 @@ s_Directions CDirections::Pop(void)
 //+------------------------------------------------------------------+
 s_Directions CDirections::GetItem(int index)
   {
-
    return always_direction[index];
   }
 //+------------------------------------------------------------------+
