@@ -7,7 +7,7 @@
 #property copyright "Copyright 2021, MetaQuotes Ltd."
 #property link "https://www.mql5.com"
 
-// Trend bars in trend movement, bull bars in acending movement.
+#define DAY_SEC 86400
 
 #include <Dev\Brooks\Structs.mqh>
 #include <Dev\Brooks\Utils.mqh>
@@ -450,4 +450,95 @@ GraphExtremeStruc CManageExtremes::GetNode(int index=0)
   }
 
 //+------------------------------------------------------------------+
-MINMAX 
+//|                                                                  |
+//+------------------------------------------------------------------+
+int CountDistanceFromCurrentCandle(int days=0,ENUM_TIMEFRAMES time_frame=0)
+  {
+   MqlDateTime today;
+   TimeCurrent(today);
+   today.hour = 0;
+   today.min = 1;
+   today.sec = 0;
+   datetime today_datetime = StructToTime(today);
+   today_datetime-=(days*DAY_SEC);
+   Print("today_datetime: ", today_datetime);
+   return iBarShift(_Symbol,time_frame,today_datetime,false)-1;
+  }
+
+bool first_run=true;
+MINMAX MinOrMaxLastOld(int days=1)
+  {
+   MINMAX min_max=WRONG_VALUE;
+
+   if(candleCount==0)
+      first_run = true;
+   if(first_run && IsBearBar(1))
+     {
+      first_run=false;
+      return MIN;
+     }
+   if(first_run && IsBullBar(1))
+     {
+      first_run=false;
+      return MAX;
+     }
+
+   int size = CountDistanceFromCurrentCandle(days);
+   Print("size: ",size);
+   double last_high = iHigh(_Symbol,_Period,size);
+   double last_low = iLow(_Symbol,_Period,size);
+
+   for(int i=size; i>=0; i--)
+     {
+      double current_high = iHigh(_Symbol,_Period,i);
+      double current_low = iLow(_Symbol,_Period,i);
+      if(current_high >= last_high)
+        {
+         min_max = MAX;
+         last_high = current_high;
+         Print("last_high: ",last_high);
+        }
+      if(current_low <= last_low)
+        {
+         min_max = MIN;
+         last_low = current_low;
+         Print("last_low: ",last_low);
+        }
+     }
+   return min_max;
+
+  }
+
+
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+MINMAX MinOrMaxLast(int days=1)
+  {
+   int size = CountDistanceFromCurrentCandle(days);
+
+   int high_index = iHighest(_Symbol,_Period,MODE_HIGH,size,0);
+   int low_index = iLowest(_Symbol,_Period,MODE_LOW,size,0);
+   if(high_index<low_index)
+      return MAX;
+   if(low_index<high_index)
+      return MIN;
+
+   if(low_index==high_index)
+     {
+      if(IsBearBar(low_index))
+        {
+         return MIN;
+        }
+      if(IsBullBar(high_index))
+        {
+         return MAX;
+        }
+      else
+         return WRONG_VALUE;
+     }
+     
+   return WRONG_VALUE;
+
+  }
+//+------------------------------------------------------------------+
