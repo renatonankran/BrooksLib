@@ -1,5 +1,5 @@
 //+------------------------------------------------------------------+
-//|                                                 AlwaysInEnum.mqh |
+//|                                                        Index.mqh |
 //|                                  Copyright 2021, MetaQuotes Ltd. |
 //|                                             https://www.mql5.com |
 //+------------------------------------------------------------------+
@@ -25,46 +25,5 @@
 //   string ErrorDescription(int error_code);
 // #import
 //+------------------------------------------------------------------+
-enum ALWAYS_IN
-  {
-   ALWAYS_IN_LONG=0,
-   ALWAYS_IN_SHORT,
-   ALWAYS_IN_RANGE
-  };
-
-enum MICRO_CHANNEL {
-   BULL_MC=0,
-   BEAR_MC,
-   NO_CHANNEL
-};
-
-enum PULLBACK {
-   BEAR_PB = 0,
-   BULL_PB,
-   NO_PB
-};
-
-enum HIGHCOUNT {
-H_1 = 1,
-   H_2,
-   H_3,
-   H_4,
-   H_5
-};
-enum LOWCOUNT {
-   L_1=1,
-   L_2,
-   L_3,
-   L_4,
-   L_5
-};
-
-enum MINMAX {
-   MIN,
-   MAX
-};
-
-enum HILO {
-   HIGH,
-   LOW
-};
+#include <Dev\Brooks\Features\ManageExtremes.mqh>
+#include <Dev\Brooks\Features\Pullback.mqh>
