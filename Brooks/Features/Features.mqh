@@ -258,6 +258,7 @@ public:
                      CGraphExtremes(void);
                     ~CGraphExtremes(void);
    void              Append(GraphExtremeStruc &node);
+   void              Insert(int p_position, GraphExtremeStruc &node);
    void              Extend();
    GraphExtremeStruc GetNode(int index);
    void              IncrementRight(void);
@@ -278,6 +279,29 @@ CGraphExtremes::CGraphExtremes(void)
 //|                                                                  |
 //+------------------------------------------------------------------+
 CGraphExtremes::~CGraphExtremes(void) {}
+
+
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+void CGraphExtremes::Append(GraphExtremeStruc &node)
+  {
+   if(last_position_ >= ArraySize(graph_extremes_))
+      Extend();
+
+   graph_extremes_[last_position_] = node;
+
+   ++last_position_;
+  }
+
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+void CGraphExtremes::Extend(void)
+  {
+   ArrayResize(graph_extremes_, ArraySize(graph_extremes_)+256);
+  }
+
 
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -308,27 +332,7 @@ GraphExtremeStruc CGraphExtremes::GetNode(int index)
       return graph;
    return graph_extremes_[index];
   }
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
-void CGraphExtremes::Append(GraphExtremeStruc &node)
-  {
-   if(last_position_ >= ArraySize(graph_extremes_))
-      Extend();
-
-   graph_extremes_[last_position_] = node;
-
-   ++last_position_;
-  }
-
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
-void CGraphExtremes::Extend(void)
-  {
-   ArrayResize(graph_extremes_, ArraySize(graph_extremes_)+256);
-  }
-
+  
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -336,6 +340,5 @@ void CGraphExtremes::IncrementRight(void)
   {
    graph_extremes_[GetLastIndex()].AddToRightWeight();
   }
-
-
+  
 //+------------------------------------------------------------------+

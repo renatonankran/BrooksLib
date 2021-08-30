@@ -168,7 +168,7 @@ bool CPullback::LowerHighSequence(int size)
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-double CPullback::OverlapLevel(int bar1,int bar2, HILO hilo=WRONG_VALUE)
+double CPullback::OverlapLevel(int bar1,int bar2)
   {
    double total_range = 1;
    double intersection = 1;
