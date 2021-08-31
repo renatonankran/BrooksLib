@@ -101,6 +101,7 @@ struct MinMaxStruc
    double            max;
    datetime          min_timestamp, max_timestamp;
    bool              pullback_started;
+   int               level;
                      MinMaxStruc(): min(MAX_DBL), max(MIN_DBL) {};
   };
 //+------------------------------------------------------------------+

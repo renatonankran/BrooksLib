@@ -252,18 +252,21 @@ MINMAX PeriodMinOrMax(int p_count, int p_start)
 class CGraphExtremes
   {
 public:
-   GraphExtremeStruc graph_extremes_[];
-   int               last_position_;
+   GraphExtremeStruc major_extremes_[], complete_extremes_[];
+   int               last_major_position_, last_complete_position_;
 
                      CGraphExtremes(void);
                     ~CGraphExtremes(void);
    void              Append(GraphExtremeStruc &node);
    void              Insert(int p_position, GraphExtremeStruc &node);
-   void              Extend();
+   void              Extend(GraphExtremeStruc &arr[]);
+   int               GetMajorSize(void);
+   int               GetLastMajorIndex(void);
+   GraphExtremeStruc GetMajorNode(int index);
    GraphExtremeStruc GetNode(int index);
    void              IncrementRight(void);
-   int               GetSize(void);
-   int               GetLastIndex(void);
+   int               GetSizeComplete(void);
+   int               GetLastIndexComplete(void);
   };
 
 //+------------------------------------------------------------------+
@@ -271,8 +274,10 @@ public:
 //+------------------------------------------------------------------+
 CGraphExtremes::CGraphExtremes(void)
   {
-   last_position_=0;
-   ArrayResize(graph_extremes_, 256);
+   last_major_position_=0;
+   last_complete_position_=0;
+   ArrayResize(major_extremes_, 256);
+   ArrayResize(complete_extremes_, 256);
   }
 
 //+------------------------------------------------------------------+
@@ -286,37 +291,74 @@ CGraphExtremes::~CGraphExtremes(void) {}
 //+------------------------------------------------------------------+
 void CGraphExtremes::Append(GraphExtremeStruc &node)
   {
-   if(last_position_ >= ArraySize(graph_extremes_))
-      Extend();
+   if(last_major_position_ >= ArraySize(major_extremes_))
+      Extend(major_extremes_);
+   if(last_complete_position_ >= ArraySize(complete_extremes_))
+      Extend(complete_extremes_);
 
-   graph_extremes_[last_position_] = node;
+   if(node.importance==1)
+     {
+      major_extremes_[last_major_position_] = node;
+      ++last_major_position_;
+     }
 
-   ++last_position_;
+   complete_extremes_[last_complete_position_] = node;
+   ++last_complete_position_;
   }
 
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-void CGraphExtremes::Extend(void)
+void CGraphExtremes::Extend(GraphExtremeStruc &arr[])
   {
-   ArrayResize(graph_extremes_, ArraySize(graph_extremes_)+256);
+   ArrayResize(arr, ArraySize(arr)+256);
   }
 
 
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-int CGraphExtremes::GetSize(void)
+int CGraphExtremes::GetMajorSize(void)
   {
-   return last_position_;
+   return last_major_position_;
   }
 
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-int CGraphExtremes::GetLastIndex(void)
+int CGraphExtremes::GetLastMajorIndex(void)
   {
-   int tmp = last_position_-1;
+   int tmp = last_major_position_-1;
+   if(tmp<0)
+      return 0;
+   return tmp;
+  }
+
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+GraphExtremeStruc CGraphExtremes::GetMajorNode(int index)
+  {
+   GraphExtremeStruc graph;
+   if(index<0)
+      return graph;
+   return major_extremes_[index];
+  }
+
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+int CGraphExtremes::GetSizeComplete(void)
+  {
+   return last_complete_position_;
+  }
+
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+int CGraphExtremes::GetLastIndexComplete(void)
+  {
+   int tmp = last_complete_position_-1;
    if(tmp<0)
       return 0;
    return tmp;
@@ -330,15 +372,8 @@ GraphExtremeStruc CGraphExtremes::GetNode(int index)
    GraphExtremeStruc graph;
    if(index<0)
       return graph;
-   return graph_extremes_[index];
+   return complete_extremes_[index];
   }
-  
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
-void CGraphExtremes::IncrementRight(void)
-  {
-   graph_extremes_[GetLastIndex()].AddToRightWeight();
-  }
-  
+
+
 //+------------------------------------------------------------------+
