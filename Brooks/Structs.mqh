@@ -11,7 +11,7 @@
 
 struct MicroChannelStruc
   {
-                     MicroChannelStruc(): ChannelOrientation(NO_CHANNEL), size(0), start_arrow_name("arrow"+(string)MathRand()), end_arrow_name("arrow"+(string)MathRand()) {};
+                     MicroChannelStruc(): ChannelOrientation(NO_CHANNEL), size(0), start_arrow_name("arrow" + (string)MathRand()), end_arrow_name("arrow" + (string)MathRand()) {};
    MICRO_CHANNEL     ChannelOrientation;
    int               size;
    string            start_arrow_name;
@@ -26,7 +26,7 @@ struct GraphExtremeStruc
                      double p_extreme_high,
                      double p_extreme_low,
                      HILO p_hilo,
-                     int p_importance=1);
+                     int p_importance = 1);
 
    int               left_weight;
    int               right_weight;
@@ -37,7 +37,7 @@ struct GraphExtremeStruc
    double            extreme_high;
    double            extreme_low;
    int               GetBarIndex(void);
-   void              AddToRightWeight(int val=1);
+   void              AddToRightWeight(int val = 1);
    void              Close(void);
    void              PrintNode(void);
   };
@@ -50,7 +50,7 @@ GraphExtremeStruc::GraphExtremeStruc(int p_right_weight,
                                      double p_extreme_high,
                                      double p_extreme_low,
                                      HILO p_hilo,
-                                     int p_importance=1)
+                                     int p_importance = 1)
   {
    hilo = p_hilo;
    importance = p_importance;
@@ -64,9 +64,9 @@ GraphExtremeStruc::GraphExtremeStruc(int p_right_weight,
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-void GraphExtremeStruc::AddToRightWeight(int val=1)
+void GraphExtremeStruc::AddToRightWeight(int val = 1)
   {
-   right_weight+=val;
+   right_weight += val;
   };
 
 //+------------------------------------------------------------------+
@@ -74,7 +74,7 @@ void GraphExtremeStruc::AddToRightWeight(int val=1)
 //+------------------------------------------------------------------+
 void GraphExtremeStruc::Close(void)
   {
-   closed=true;
+   closed = true;
   };
 
 //+------------------------------------------------------------------+
@@ -95,13 +95,30 @@ void GraphExtremeStruc::PrintNode(void)
 
 
 //+------------------------------------------------------------------+
-struct MinMaxStruc
+struct LegStruc
   {
    double            min;
    double            max;
    datetime          min_timestamp, max_timestamp;
-   bool              pullback_started;
+   bool              pullback_gap;
+   double            retracement_level;
+   int               num_of_pb_bars;
    int               level;
-                     MinMaxStruc(): min(MAX_DBL), max(MIN_DBL) {};
+                     LegStruc(): min(MAX_DBL), max(MIN_DBL) {};
+   void              PrintLeg(void);
   };
+
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+void LegStruc::PrintLeg(void)
+  {
+   Print("level: ", level);
+   Print("min: ", min);
+   Print("min_timestamp: ", min_timestamp);
+   Print("max_timestamp: ", max_timestamp);
+   Print("pullback_gap: ", pullback_gap);
+   Print("retracement_level: ", retracement_level);
+   Print("num_of_pb_bars: ", num_of_pb_bars);
+  }
 //+------------------------------------------------------------------+
