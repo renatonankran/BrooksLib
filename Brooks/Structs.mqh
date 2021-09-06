@@ -103,10 +103,53 @@ struct LegStruc
    bool              pullback_gap;
    double            retracement_level;
    int               num_of_pb_bars;
+   bool              gap_trigger;
+   int               n_of_bars_trigger;
+   bool              signal_bar_trigger;
+   bool              breakout;
    int               level;
                      LegStruc(): min(MAX_DBL), max(MIN_DBL) {};
    void              PrintLeg(void);
+   void              Reset(void);
+   void              Update(LegStruc &p_leg);
   };
+
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+void LegStruc::Update(LegStruc &p_leg)
+  {
+   min = p_leg.min;
+   max = p_leg.max;
+   min_timestamp = p_leg.min_timestamp;
+   max_timestamp = p_leg.max_timestamp;
+   pullback_gap = p_leg.pullback_gap;
+   retracement_level = p_leg.retracement_level;
+   num_of_pb_bars = p_leg.num_of_pb_bars;
+   gap_trigger = p_leg.gap_trigger;
+   signal_bar_trigger = p_leg.signal_bar_trigger;
+   n_of_bars_trigger = p_leg.n_of_bars_trigger;
+   breakout = p_leg.breakout;
+  }
+
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+void LegStruc::Reset(void)
+  {
+   datetime time = TimeCurrent() - 2*DAY_SEC;
+   min = MAX_DBL;
+   max = MIN_DBL;
+   min_timestamp = time;
+   max_timestamp = time;
+   pullback_gap = false;
+   retracement_level = 0;
+   num_of_pb_bars = 0 ;
+   n_of_bars_trigger = 0;
+   signal_bar_trigger = false;
+   gap_trigger = false;
+   breakout = false;
+  }
 
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -115,10 +158,15 @@ void LegStruc::PrintLeg(void)
   {
    Print("level: ", level);
    Print("min: ", min);
+   Print("max: ", max);
    Print("min_timestamp: ", min_timestamp);
    Print("max_timestamp: ", max_timestamp);
    Print("pullback_gap: ", pullback_gap);
    Print("retracement_level: ", retracement_level);
    Print("num_of_pb_bars: ", num_of_pb_bars);
+   Print("gap_trigger: ", gap_trigger);
+   Print("n_of_bars_trigger: ", n_of_bars_trigger);
+   Print("signal_bar_trigger: ", signal_bar_trigger);
+   Print("breakout: ", breakout);
   }
 //+------------------------------------------------------------------+

@@ -7,8 +7,6 @@
 #property copyright "Copyright 2021, MetaQuotes Ltd."
 #property link "https://www.mql5.com"
 
-#define DAY_SEC 86400
-
 #include <Dev\Brooks\Structs.mqh>
 #include <Dev\Brooks\Utils.mqh>
 
