@@ -25,6 +25,8 @@
 //   string ErrorDescription(int error_code);
 // #import
 //+------------------------------------------------------------------+
+#define DAY_SEC 86400
+
 enum ALWAYS_IN
   {
    ALWAYS_IN_LONG=0,
