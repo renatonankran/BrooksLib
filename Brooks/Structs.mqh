@@ -21,15 +21,12 @@ struct MicroChannelStruc
 struct GraphExtremeStruc
   {
                      GraphExtremeStruc(): hilo(WRONG_VALUE) {};
-                     GraphExtremeStruc(int p_right_weight,
-                     datetime p_timestamp,
+                     GraphExtremeStruc(datetime p_timestamp,
                      double p_extreme_high,
                      double p_extreme_low,
                      HILO p_hilo,
                      int p_importance = 1);
 
-   int               left_weight;
-   int               right_weight;
    int               importance;
    HILO              hilo;
    bool              closed;
@@ -37,7 +34,6 @@ struct GraphExtremeStruc
    double            extreme_high;
    double            extreme_low;
    int               GetBarIndex(void);
-   void              AddToRightWeight(int val = 1);
    void              Close(void);
    void              PrintNode(void);
   };
@@ -45,8 +41,7 @@ struct GraphExtremeStruc
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-GraphExtremeStruc::GraphExtremeStruc(int p_right_weight,
-                                     datetime p_timestamp,
+GraphExtremeStruc::GraphExtremeStruc(datetime p_timestamp,
                                      double p_extreme_high,
                                      double p_extreme_low,
                                      HILO p_hilo,
@@ -54,20 +49,10 @@ GraphExtremeStruc::GraphExtremeStruc(int p_right_weight,
   {
    hilo = p_hilo;
    importance = p_importance;
-   right_weight = 1;
-   left_weight = p_right_weight;
    timestamp = p_timestamp;
    extreme_high = p_extreme_high;
    extreme_low = p_extreme_low;
   }
-
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
-void GraphExtremeStruc::AddToRightWeight(int val = 1)
-  {
-   right_weight += val;
-  };
 
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -82,8 +67,6 @@ void GraphExtremeStruc::Close(void)
 //+------------------------------------------------------------------+
 void GraphExtremeStruc::PrintNode(void)
   {
-   Print("left_weight: ", left_weight);
-   Print("right_weight: ", right_weight);
    Print("closed: ", closed);
    Print("timestamp: ", timestamp);
    Print("extreme_high: ", extreme_high);
@@ -103,17 +86,26 @@ struct LegStruc
    bool              pullback_gap;
    double            retracement_level;
    int               num_of_pb_bars;
-   bool              gap_trigger;
-   int               n_of_bars_trigger;
-   bool              signal_bar_trigger;
+   bool              TypeOneTrigger;
+   bool              TypeTwoTrigger;
    bool              breakout;
    int               level;
                      LegStruc(): min(MAX_DBL), max(MIN_DBL) {};
+                     LegStruc(double min, double max, datetime min_timestamp, datetime max_timestamp);
    void              PrintLeg(void);
    void              Reset(void);
    void              Update(LegStruc &p_leg);
   };
-
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+LegStruc::LegStruc(double p_min, double p_max, datetime p_min_timestamp, datetime p_max_timestamp)
+  {
+   min = p_min;
+   max = p_max;
+   min_timestamp = p_min_timestamp;
+   max_timestamp = p_max_timestamp;
+  }
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -126,9 +118,8 @@ void LegStruc::Update(LegStruc &p_leg)
    pullback_gap = p_leg.pullback_gap;
    retracement_level = p_leg.retracement_level;
    num_of_pb_bars = p_leg.num_of_pb_bars;
-   gap_trigger = p_leg.gap_trigger;
-   signal_bar_trigger = p_leg.signal_bar_trigger;
-   n_of_bars_trigger = p_leg.n_of_bars_trigger;
+   TypeOneTrigger = p_leg.TypeOneTrigger;
+   TypeTwoTrigger = p_leg.TypeTwoTrigger;
    breakout = p_leg.breakout;
   }
 
@@ -137,7 +128,7 @@ void LegStruc::Update(LegStruc &p_leg)
 //+------------------------------------------------------------------+
 void LegStruc::Reset(void)
   {
-   datetime time = TimeCurrent() - 2*DAY_SEC;
+   datetime time = TimeCurrent() - 2 * DAY_SEC;
    min = MAX_DBL;
    max = MIN_DBL;
    min_timestamp = time;
@@ -145,9 +136,8 @@ void LegStruc::Reset(void)
    pullback_gap = false;
    retracement_level = 0;
    num_of_pb_bars = 0 ;
-   n_of_bars_trigger = 0;
-   signal_bar_trigger = false;
-   gap_trigger = false;
+   TypeOneTrigger = false;
+   TypeTwoTrigger = false;
    breakout = false;
   }
 
@@ -164,9 +154,8 @@ void LegStruc::PrintLeg(void)
    Print("pullback_gap: ", pullback_gap);
    Print("retracement_level: ", retracement_level);
    Print("num_of_pb_bars: ", num_of_pb_bars);
-   Print("gap_trigger: ", gap_trigger);
-   Print("n_of_bars_trigger: ", n_of_bars_trigger);
-   Print("signal_bar_trigger: ", signal_bar_trigger);
+   Print("TypeOneTrigger: ", TypeOneTrigger);
+   Print("TypeTwoTrigger: ", TypeTwoTrigger);
    Print("breakout: ", breakout);
   }
 //+------------------------------------------------------------------+

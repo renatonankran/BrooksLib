@@ -20,7 +20,7 @@ MicroChannelStruc MicroChannel(int p_min_size, MicroChannelStruc &channelInfo)
 
    for(int i = 0; i < p_min_size; i++)
      {
-      if(HigherLow(i + 1) && (IsBullBar(i + 1)||IsDoji(i+1)))
+      if(HigherLow(i + 1) && (IsBullBar(i + 1) || IsDoji(i + 1)))
         {
          bull_mc++;
          if(bull_mc == p_min_size)
@@ -41,7 +41,7 @@ MicroChannelStruc MicroChannel(int p_min_size, MicroChannelStruc &channelInfo)
             return mc;
            }
         }
-      if(LowerHigh(i + 1) && (IsBearBar(i + 1)||IsDoji(i+1)))
+      if(LowerHigh(i + 1) && (IsBearBar(i + 1) || IsDoji(i + 1)))
         {
          bear_mc++;
          if(bear_mc == p_min_size)
@@ -105,7 +105,14 @@ bool IsBearBar(int index)
       return true;
    return false;
   }
-
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+bool IsOutsideCandle(int p_index)
+  {
+   return (iHigh(_Symbol, _Period, p_index) >= iHigh(_Symbol, _Period, p_index - 1) &&
+           iLow(_Symbol, _Period, p_index) <= iLow(_Symbol, _Period, p_index - 1));
+  }
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
@@ -123,7 +130,7 @@ bool IsDoji(int index)
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-int CountDistanceFromCurrentCandle(int days=0,ENUM_TIMEFRAMES time_frame=0)
+int CountDistanceFromCurrentCandle(int days = 0, ENUM_TIMEFRAMES time_frame = 0)
   {
    MqlDateTime today;
    TimeCurrent(today);
@@ -131,48 +138,56 @@ int CountDistanceFromCurrentCandle(int days=0,ENUM_TIMEFRAMES time_frame=0)
    today.min = 1;
    today.sec = 0;
    datetime today_datetime = StructToTime(today);
-   today_datetime-=(days*DAY_SEC);
-   return iBarShift(_Symbol,time_frame,today_datetime,false)-1;
+   today_datetime -= (days * DAY_SEC);
+   return iBarShift(_Symbol, time_frame, today_datetime, false) - 1;
   }
 
-bool first_run=true;
-MINMAX MinOrMaxLastOld(int days=1)
+//+------------------------------------------------------------------+
+//|                                                                  |
+//+------------------------------------------------------------------+
+int CandleDistance(datetime p_time_1, datetime p_time_2, ENUM_TIMEFRAMES time_frame = 0)
   {
-   MINMAX min_max=WRONG_VALUE;
+   return MathAbs(iBarShift(_Symbol, time_frame, p_time_1, false) - iBarShift(_Symbol, time_frame, p_time_2, false));
+  }
 
-   if(candleCount==0)
+bool first_run = true;
+MINMAX MinOrMaxLastOld(int days = 1)
+  {
+   MINMAX min_max = WRONG_VALUE;
+
+   if(candleCount == 0)
       first_run = true;
    if(first_run && IsBearBar(1))
      {
-      first_run=false;
+      first_run = false;
       return MIN;
      }
    if(first_run && IsBullBar(1))
      {
-      first_run=false;
+      first_run = false;
       return MAX;
      }
 
    int size = CountDistanceFromCurrentCandle(days);
-   Print("size: ",size);
-   double last_high = iHigh(_Symbol,_Period,size);
-   double last_low = iLow(_Symbol,_Period,size);
+   Print("size: ", size);
+   double last_high = iHigh(_Symbol, _Period, size);
+   double last_low = iLow(_Symbol, _Period, size);
 
-   for(int i=size; i>=0; i--)
+   for(int i = size; i >= 0; i--)
      {
-      double current_high = iHigh(_Symbol,_Period,i);
-      double current_low = iLow(_Symbol,_Period,i);
+      double current_high = iHigh(_Symbol, _Period, i);
+      double current_low = iLow(_Symbol, _Period, i);
       if(current_high >= last_high)
         {
          min_max = MAX;
          last_high = current_high;
-         Print("last_high: ",last_high);
+         Print("last_high: ", last_high);
         }
       if(current_low <= last_low)
         {
          min_max = MIN;
          last_low = current_low;
-         Print("last_low: ",last_low);
+         Print("last_low: ", last_low);
         }
      }
    return min_max;
@@ -183,19 +198,19 @@ MINMAX MinOrMaxLastOld(int days=1)
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-MINMAX MinOrMaxLast(int days=1)
+MINMAX MinOrMaxLast(int days = 1)
   {
    int size = CountDistanceFromCurrentCandle(days);
 
-   int high_index = iHighest(_Symbol,_Period,MODE_HIGH,size,0);
-   int low_index = iLowest(_Symbol,_Period,MODE_LOW,size,0);
+   int high_index = iHighest(_Symbol, _Period, MODE_HIGH, size, 0);
+   int low_index = iLowest(_Symbol, _Period, MODE_LOW, size, 0);
 
-   if(high_index<low_index)
+   if(high_index < low_index)
       return MAX;
-   if(low_index<high_index)
+   if(low_index < high_index)
       return MIN;
 
-   if(low_index==high_index)
+   if(low_index == high_index)
      {
       if(IsBearBar(low_index))
         {
@@ -218,15 +233,15 @@ MINMAX MinOrMaxLast(int days=1)
 //+------------------------------------------------------------------+
 MINMAX PeriodMinOrMax(int p_count, int p_start)
   {
-   int high_index = iHighest(_Symbol,_Period,MODE_HIGH,p_count,p_start);
-   int low_index = iLowest(_Symbol,_Period,MODE_LOW,p_count,p_start);
-   Print(iTime(_Symbol,_Period,high_index));
-   if(high_index<low_index)
+   int high_index = iHighest(_Symbol, _Period, MODE_HIGH, p_count, p_start);
+   int low_index = iLowest(_Symbol, _Period, MODE_LOW, p_count, p_start);
+   Print(iTime(_Symbol, _Period, high_index));
+   if(high_index < low_index)
       return MAX;
-   if(low_index<high_index)
+   if(low_index < high_index)
       return MIN;
 
-   if(low_index==high_index)
+   if(low_index == high_index)
      {
       if(IsBearBar(low_index))
         {
@@ -272,8 +287,8 @@ public:
 //+------------------------------------------------------------------+
 CGraphExtremes::CGraphExtremes(void)
   {
-   last_major_position_=0;
-   last_complete_position_=0;
+   last_major_position_ = 0;
+   last_complete_position_ = 0;
    ArrayResize(major_extremes_, 256);
    ArrayResize(complete_extremes_, 256);
   }
@@ -294,7 +309,7 @@ void CGraphExtremes::Append(GraphExtremeStruc &node)
    if(last_complete_position_ >= ArraySize(complete_extremes_))
       Extend(complete_extremes_);
 
-   if(node.importance==1)
+   if(node.importance == 1)
      {
       major_extremes_[last_major_position_] = node;
       ++last_major_position_;
@@ -309,7 +324,7 @@ void CGraphExtremes::Append(GraphExtremeStruc &node)
 //+------------------------------------------------------------------+
 void CGraphExtremes::Extend(GraphExtremeStruc &arr[])
   {
-   ArrayResize(arr, ArraySize(arr)+256);
+   ArrayResize(arr, ArraySize(arr) + 256);
   }
 
 
@@ -326,8 +341,8 @@ int CGraphExtremes::GetMajorSize(void)
 //+------------------------------------------------------------------+
 int CGraphExtremes::GetLastMajorIndex(void)
   {
-   int tmp = last_major_position_-1;
-   if(tmp<0)
+   int tmp = last_major_position_ - 1;
+   if(tmp < 0)
       return 0;
    return tmp;
   }
@@ -338,7 +353,7 @@ int CGraphExtremes::GetLastMajorIndex(void)
 GraphExtremeStruc CGraphExtremes::GetMajorNode(int index)
   {
    GraphExtremeStruc graph;
-   if(index<0)
+   if(index < 0)
       return graph;
    return major_extremes_[index];
   }
@@ -356,8 +371,8 @@ int CGraphExtremes::GetSizeComplete(void)
 //+------------------------------------------------------------------+
 int CGraphExtremes::GetLastIndexComplete(void)
   {
-   int tmp = last_complete_position_-1;
-   if(tmp<0)
+   int tmp = last_complete_position_ - 1;
+   if(tmp < 0)
       return 0;
    return tmp;
   }
@@ -368,7 +383,7 @@ int CGraphExtremes::GetLastIndexComplete(void)
 GraphExtremeStruc CGraphExtremes::GetNode(int index)
   {
    GraphExtremeStruc graph;
-   if(index<0)
+   if(index < 0)
       return graph;
    return complete_extremes_[index];
   }
