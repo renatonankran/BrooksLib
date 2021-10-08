@@ -6,9 +6,8 @@
 #property copyright "Copyright 2021, MetaQuotes Ltd."
 #property link      "https://www.mql5.com"
 
-
-
 #include <Dev\Brooks\Features\Pullback.mqh>
+#include <Dev\Brooks\Features\GraphExtremes.mqh>
 
 //+------------------------------------------------------------------+
 //|                                                                  |
@@ -277,6 +276,7 @@ void CreateLabel(HILO p_dir, double p_price, datetime p_time, int p_imp)
                ": failed to create a Label! Error code = ", GetLastError());
         }
       ObjectSetString(0, name, OBJPROP_TEXT, (string)p_imp);
+      ObjectSetInteger(0,name,OBJPROP_SELECTABLE,true);
      }
 
    if(p_dir == LOW)
@@ -288,6 +288,7 @@ void CreateLabel(HILO p_dir, double p_price, datetime p_time, int p_imp)
                ": failed to create a Label! Error code = ", GetLastError());
         }
       ObjectSetString(0, name, OBJPROP_TEXT, (string)p_imp);
+      ObjectSetInteger(0,name,OBJPROP_SELECTABLE,true);
      }
   }
 //+------------------------------------------------------------------+

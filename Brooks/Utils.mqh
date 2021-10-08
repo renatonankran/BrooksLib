@@ -10,6 +10,7 @@ datetime lastCandleTimeStamp;
 MqlDateTime day;
 int candleCount = 0;
 bool new_candle = false;
+double simbol_tick;
 
 //+------------------------------------------------------------------+
 //|                                                                  |

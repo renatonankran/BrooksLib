@@ -6,8 +6,7 @@
 
 #property copyright "Copyright 2021, MetaQuotes Ltd."
 #property link "https://www.mql5.com"
-
-#include <Dev\Brooks\Structs.mqh>
+#include <Dev\Brooks\Features\Structs\Index.mqh>
 #include <Dev\Brooks\Utils.mqh>
 
 //+------------------------------------------------------------------+
@@ -134,6 +133,9 @@ int CountDistanceFromCurrentCandle(int days = 0, ENUM_TIMEFRAMES time_frame = 0)
   {
    MqlDateTime today;
    TimeCurrent(today);
+//today.year = 2019;
+//today.mon = 1;
+//today.day = 1;
    today.hour = 0;
    today.min = 1;
    today.sec = 0;
@@ -262,131 +264,15 @@ MINMAX PeriodMinOrMax(int p_count, int p_start)
 //+------------------------------------------------------------------+
 //|                                                                  |
 //+------------------------------------------------------------------+
-class CGraphExtremes
+class OHLC
   {
 public:
-   GraphExtremeStruc major_extremes_[], complete_extremes_[];
-   int               last_major_position_, last_complete_position_;
 
-                     CGraphExtremes(void);
-                    ~CGraphExtremes(void);
-   void              Append(GraphExtremeStruc &node);
-   void              Insert(int p_position, GraphExtremeStruc &node);
-   void              Extend(GraphExtremeStruc &arr[]);
-   int               GetMajorSize(void);
-   int               GetLastMajorIndex(void);
-   GraphExtremeStruc GetMajorNode(int index);
-   GraphExtremeStruc GetNode(int index);
-   void              IncrementRight(void);
-   int               GetSizeComplete(void);
-   int               GetLastIndexComplete(void);
+   double            iO(int shift) {return iOpen(_Symbol, _Period, shift);}
+   double            iH(int shift) {return iHigh(_Symbol, _Period, shift);}
+   double            iL(int shift) {return iLow(_Symbol, _Period, shift);}
+   double            iC(int shift) {return iClose(_Symbol, _Period, shift);}
+   datetime          iT(int shift) {return iTime(_Symbol, _Period, shift);}
+   int               iB(datetime time) {return iBarShift(_Symbol, _Period, time, true);}
   };
-
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
-CGraphExtremes::CGraphExtremes(void)
-  {
-   last_major_position_ = 0;
-   last_complete_position_ = 0;
-   ArrayResize(major_extremes_, 256);
-   ArrayResize(complete_extremes_, 256);
-  }
-
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
-CGraphExtremes::~CGraphExtremes(void) {}
-
-
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
-void CGraphExtremes::Append(GraphExtremeStruc &node)
-  {
-   if(last_major_position_ >= ArraySize(major_extremes_))
-      Extend(major_extremes_);
-   if(last_complete_position_ >= ArraySize(complete_extremes_))
-      Extend(complete_extremes_);
-
-   if(node.importance == 1)
-     {
-      major_extremes_[last_major_position_] = node;
-      ++last_major_position_;
-     }
-
-   complete_extremes_[last_complete_position_] = node;
-   ++last_complete_position_;
-  }
-
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
-void CGraphExtremes::Extend(GraphExtremeStruc &arr[])
-  {
-   ArrayResize(arr, ArraySize(arr) + 256);
-  }
-
-
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
-int CGraphExtremes::GetMajorSize(void)
-  {
-   return last_major_position_;
-  }
-
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
-int CGraphExtremes::GetLastMajorIndex(void)
-  {
-   int tmp = last_major_position_ - 1;
-   if(tmp < 0)
-      return 0;
-   return tmp;
-  }
-
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
-GraphExtremeStruc CGraphExtremes::GetMajorNode(int index)
-  {
-   GraphExtremeStruc graph;
-   if(index < 0)
-      return graph;
-   return major_extremes_[index];
-  }
-
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
-int CGraphExtremes::GetSizeComplete(void)
-  {
-   return last_complete_position_;
-  }
-
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
-int CGraphExtremes::GetLastIndexComplete(void)
-  {
-   int tmp = last_complete_position_ - 1;
-   if(tmp < 0)
-      return 0;
-   return tmp;
-  }
-
-//+------------------------------------------------------------------+
-//|                                                                  |
-//+------------------------------------------------------------------+
-GraphExtremeStruc CGraphExtremes::GetNode(int index)
-  {
-   GraphExtremeStruc graph;
-   if(index < 0)
-      return graph;
-   return complete_extremes_[index];
-  }
-
-
 //+------------------------------------------------------------------+

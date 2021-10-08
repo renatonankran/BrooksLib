@@ -27,3 +27,5 @@
 //+------------------------------------------------------------------+
 #include <Dev\Brooks\Features\ManageExtremes.mqh>
 #include <Dev\Brooks\Features\Pullback.mqh>
+#include <Dev\Brooks\Features\GraphExtremes.mqh>
+#include <Dev\Brooks\Features\DayRetracement.mqh>
